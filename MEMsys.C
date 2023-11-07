@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 
-int rafael() {
-    printf("Rafael");
+int Juan() {
+    printf("Juan");
     return 0;
 }
 
