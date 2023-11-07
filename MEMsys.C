@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-
 int Juan() {
     printf("Juan");
     return 0;
