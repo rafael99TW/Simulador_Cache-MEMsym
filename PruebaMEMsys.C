@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #define TAM_LINEA 16
 #define NUM_FILAS 16
@@ -34,25 +35,44 @@ void ImprimirCache(T_CACHE_LINE tbl[NUM_FILAS]) {
     }
 }
 
-int main() {
-    // FILE *ramFile = fopen("/home/rafael/Escritorio/SSOO/Practica 1/Practica-MEMsym/CONTENTS_RAM.bin", "rb");
-    // FILE *memFile = fopen("/home/rafael/Escritorio/SSOO/Practica 1/Practica-MEMsym/acceso_memoria.txt", "r");
+// Función para convertir un dígito hexadecimal a binario
+void HexToBinary(char hexDigit) {
+    char binary[5] = {'0'};
+    int decimal = strtol(&hexDigit, NULL, 16);
+    for (int i = 3; i >= 0; --i) {
+        binary[i] = (decimal % 2) + '0';
+        decimal /= 2;
+    }
+    printf("%s ", binary);
+}
 
-    // if (ramFile == NULL || memFile == NULL) {
-    //     printf("Error: No se pudo abrir uno o varios archivos.\n");
-        
-    // }
+// Función para procesar cada línea del archivo
+void ProcesarLinea(FILE *archivo) {
+    char linea[4]; // Considerando que cada línea tiene 3 caracteres hexadecimales
+    while (fscanf(archivo, "%s", linea) != EOF) {
+        printf("Hexadecimal: %s\nBinario: ", linea);
+        for (int i = 0; i < strlen(linea); ++i) {
+            HexToBinary(linea[i]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    FILE *memFile = fopen("accesos_memoria.txt", "r");
+
+    if (memFile == NULL) {
+        printf("No se encuentra el archivo.");
+    }
+
+    ProcesarLinea(memFile);
+
+    fclose(memFile);
 
     T_CACHE_LINE Cache[NUM_FILAS];
     LimpiarCACHE(Cache);
 
     ImprimirCache(Cache);
-
-    // fclose(ramFile);
-    // fclose(memFile);
-
-    printf("Número total de accesos: %d\n", globaltime / 20);
-    printf("Número de fallos: %d\n", numfallos);
 
     printf("\n");
     return 0;
