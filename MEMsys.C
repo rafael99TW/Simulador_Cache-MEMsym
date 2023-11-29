@@ -7,6 +7,7 @@
 #define NUM_FILAS 8
 
 unsigned char Simul_RAM[4096];
+char texto[100];
 
 int globaltime = 0;
 int numfallos = 0;
@@ -42,6 +43,13 @@ void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int*linea, int 
     *bloque = *ETQ;
 }
 
+void TratarFallo(T_CACHE_LINE *tlb, unsigned char *MRAM, int ETQ, int linea, int bloque) {
+    tlb[linea].ETQ = ETQ;
+    unsigned int inicioBloque = bloque << 7;
+    memcpy(tlb[linea].Data, &MRAM[inicioBloque], TAM_LINEA);
+    texto[strlen(texto)] = MRAM[inicioBloque + TAM_LINEA -1];
+}
+
 int main() {
     T_CACHE_LINE cache[NUM_FILAS];
 
@@ -75,10 +83,20 @@ int main() {
         ParsearDireccion(addr, &ETQ, &palabra, &linea, &bloque);
 
         if(cache[linea].ETQ != ETQ) {
-            //Tratar fallo aqui
+            numfallos++;
+            printf("T: %d, Fallo de CACHE %d, ADDR %04x, Label %X, linea %02X, palabra %02X, palabra %02X, bloque %02X\n", globaltime, numfallos, addr, ETQ, linea, palabra, bloque);
+            TratarFallo(cache, Simul_RAM, ETQ, linea, bloque);
+            printf("Cargando el bloque %d en la linea %d\n", bloque, linea);
+            globaltime += 20;
         }
 
+        printf("T: %d, Acierto de CACHE, ADDR %04x, Label %X, linea %02X, palabra %02X, DATO %02X", globaltime, addr, ETQ, linea, palabra, cache[linea].Data[palabra]);
+
+        sleep(1);
+
     }
+
+    fclose(accesosMEM);
     
 
     printf("\n");
