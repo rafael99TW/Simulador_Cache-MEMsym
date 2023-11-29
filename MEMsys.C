@@ -47,13 +47,22 @@ int main() {
     printf("\n");
 
     FILE *contentRAM = fopen("CONTENTS_RAM.bin", "rb");
-    FILE *accesosMEM = fopen("accesos_memoria.bin", "r");
+    FILE *accesosMEM = fopen("accesos_memoria.txt", "r");
 
     if(contentRAM == NULL || accesosMEM == NULL){
         fprintf(stderr, "No se encontro alguno de los archivos necesarios.\n");
         return -1;
     }
     
+    fread(Simul_RAM, sizeof(Simul_RAM), 1, contentRAM);
+
+    fclose(contentRAM);
+
+    char direccionMEM[TAM_LINEA];
+    
+    while(fgets(direccionMEM, sizeof(direccionMEM), accesosMEM) != NULL) {
+        printf(direccionMEM);
+    }
     
 
     printf("\n");
