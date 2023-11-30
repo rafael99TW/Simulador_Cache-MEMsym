@@ -35,6 +35,13 @@ void ImprimirCACHE(T_CACHE_LINE tbl[NUM_FILAS]) {
     }
 }
 
+void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int*linea, int *bloque) {
+    *palabra = addr & 0xF;
+    *linea = (addr >> 4) & 0x7;
+    *ETQ = (addr >> 7) & 0x1F;
+    *bloque = *ETQ;
+}
+
 int main() {
     T_CACHE_LINE cache[NUM_FILAS];
 
@@ -49,7 +56,7 @@ int main() {
     FILE *contentRAM = fopen("CONTENTS_RAM.bin", "rb");
     FILE *accesosMEM = fopen("accesos_memoria.txt", "r");
 
-    if(contentRAM == NULL || accesosMEM == NULL){
+    if(contentRAM == NULL || accesosMEM == NULL) {
         fprintf(stderr, "No se encontro alguno de los archivos necesarios.\n");
         return -1;
     }
@@ -59,9 +66,18 @@ int main() {
     fclose(contentRAM);
 
     char direccionMEM[TAM_LINEA];
-    
+    unsigned int addr;
+    int ETQ, palabra, linea, bloque;
+
     while(fgets(direccionMEM, sizeof(direccionMEM), accesosMEM) != NULL) {
-        printf(direccionMEM);
+        sscanf(direccionMEM, "%X", &addr);
+
+        ParsearDireccion(addr, &ETQ, &palabra, &linea, &bloque);
+
+        if(cache[linea].ETQ != ETQ) {
+            //Tratar fallo aqui
+        }
+
     }
     
 
