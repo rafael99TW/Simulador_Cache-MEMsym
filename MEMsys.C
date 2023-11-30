@@ -36,6 +36,16 @@ void ImprimirCACHE(T_CACHE_LINE tbl[NUM_FILAS]) {
     }
 }
 
+void VolcarCACHE(T_CACHE_LINE *tlb){
+    FILE * contentsCACHE = fopen("CONTENTS_CACHE.bin", "wb");
+    if(contentsCACHE == NULL){
+        fprintf(stderr, "Error al abrir el archivo CONTENTS_CACHE.bin para escritura\n");
+        return;
+    }
+    fwrite(tlb, sizeof(T_CACHE_LINE), NUM_FILAS, contentsCACHE);
+    fclose(contentsCACHE);
+}
+
 void ParsearDireccion(unsigned int addr, int *ETQ, int *palabra, int*linea, int *bloque) {
     *palabra = addr & 0xF;
     *linea = (addr >> 4) & 0x7;
@@ -47,6 +57,11 @@ void TratarFallo(T_CACHE_LINE *tlb, unsigned char *MRAM, int ETQ, int linea, int
     tlb[linea].ETQ = ETQ;
     unsigned int inicioBloque = bloque << 7;
     memcpy(tlb[linea].Data, &MRAM[inicioBloque], TAM_LINEA);
+    texto[strlen(texto)] = MRAM[inicioBloque + TAM_LINEA -1];
+}
+
+void TratarAcierto(T_CACHE_LINE *tlb, unsigned char *MRAM, int ETQ, int linea, int bloque) {
+    unsigned int inicioBloque = bloque << 7;
     texto[strlen(texto)] = MRAM[inicioBloque + TAM_LINEA -1];
 }
 
@@ -88,9 +103,15 @@ int main() {
             TratarFallo(cache, Simul_RAM, ETQ, linea, bloque);
             printf("Cargando el bloque %d en la linea %d\n", bloque, linea);
             globaltime += 20;
+        }else{
+            TratarAcierto(cache, Simul_RAM, ETQ, linea, bloque);
         }
 
         printf("T: %d, Acierto de CACHE, ADDR %04x, Label %X, linea %02X, palabra %02X, DATO %02X", globaltime, addr, ETQ, linea, palabra, cache[linea].Data[palabra]);
+
+        ImprimirCACHE(cache);
+        printf("\n");
+    
 
         sleep(1);
 
@@ -98,6 +119,10 @@ int main() {
 
     fclose(accesosMEM);
     
+    VolcarCACHE(cache);
+
+    printf("Accesos totales: %d; fallors: %d; tiempo medio: %d", globaltime, numfallos, (globaltime/numfallos));
+    printf("\ntexto leido: %s\n", texto);
 
     printf("\n");
 
